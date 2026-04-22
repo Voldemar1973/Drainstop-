@@ -2,11 +2,17 @@
   "manifest_version": 3,
   "name": "DrainStop",
   "version": "1.0",
-  "description": "Stop the drain before it starts.",
+  "description": "Stop the drain before it starts. Advanced Web3 Security.",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
   },
-  "permissions": ["storage", "notifications", "tabs"],
-  "host_permissions": ["<all_urls>"]
+  "permissions": [
+    "storage",
+    "notifications",
+    "clipboardRead"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }
