@@ -1,19 +1,38 @@
-// Подія при встановленні розширення
+// Константа для детекції сід-фрази (спрощений пошук 12 слів)
+const isSeedPhrase = (text) => {
+  const words = text.trim().split(/\s+/);
+  return words.length === 12 || words.length === 24;
+};
+
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("DrainStop: Система захисту активована.");
-  
-  // Створюємо базове налаштування захисту в пам'яті браузера
+  console.log("DrainStop: Модуль захисту буфера активовано.");
   chrome.storage.local.set({ protectionActive: true });
 });
 
-// Слухач для перехоплення запитів (фундамент для Transaction Simulation)
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    // Якщо сайт намагається відправити дані (POST-запит)
-    if (details.method === "POST") {
-      console.log("⚠️ Виявлено активність на: " + details.url);
-      // Тут ми згодом додамо перевірку на дрейнери та симуляцію балансу
+// Функція перевірки буфера обміну
+async function checkClipboard() {
+  try {
+    // Створюємо невидиме поле для "вставки" тексту з буфера
+    const input = document.createElement('textarea');
+    document.body.appendChild(input);
+    input.focus();
+    document.execCommand('paste');
+    const clipboardContent = input.value;
+    document.body.removeChild(input);
+
+    if (isSeedPhrase(clipboardContent)) {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icon.png',
+        title: '🚨 НЕБЕЗПЕКА: DrainStop',
+        message: 'Виявлено сід-фразу в буфері обміну! Будьте обережні, шкідливі сайти можуть її вкрасти.',
+        priority: 2
+      });
     }
-  },
-  { urls: ["<all_urls>"] }
-);
+  } catch (err) {
+    console.error('Помилка доступу до буфера:', err);
+  }
+}
+
+// Кожні 5 секунд перевіряємо буфер (для тесту)
+setInterval(checkClipboard, 5000);
